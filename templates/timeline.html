@@ -1,0 +1,113 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:i18n="http://genshi.edgewall.org/i18n">
+  <xi:include href="layout.html" />
+  <head>
+    <title>Timeline</title>
+    <link rel="stylesheet" type="text/css" href="${href.chrome('site/css/bootstrap-datepicker.css')}" />
+    <script src="${href.chrome('site/js/bootstrap-transition.js')}"></script>
+    <script src="${href.chrome('site/js/bootstrap-collapse.js')}"></script>
+    <script src="${href.chrome('site/js/bootstrap-datepicker.js')}"></script>
+  </head>
+
+  <body>
+    <div class="container">
+    <header class="subhead jumbotron">
+    <h1>Timeline</h1>
+    <div class="subnav">${ctxtnav()}</div>
+    </header>
+
+    <div id="content" class="timeline">
+      <div class="accordion" id="filter">
+          <div class="accordion-group">
+              <div class="accordion-heading">
+                <a class="accordion-toggle" data-toggle="collapse" data-parent="#filter" href="#filter-form">Filter</a>
+              </div>
+              <div id="filter-form" class="accordion-body collapse in" style="height: 0px; ">
+                <div class="accordion-inner">
+                  <form id="prefs" method="get" action="" class="form-horizontal">
+                      <fieldset>
+                          <div class="row">
+                              <div class="span6">
+                               <div class="control-group">
+                                   <label class="control-label">Up to</label>
+                                   <div class="controls">
+                                       <input type="text" class="input-mini" size="3" name="daysback" value="$daysback" /> days back
+                                   </div>
+                                </div>
+                               <div class="control-group">
+                                   <label class="control-label">from</label>
+                                   <div class="controls">
+                                       <input type="text" size="10" name="from" value="${format_date(fromdate)}" class="datepicker input-small" data-date-format="dd.mm.yyyy" data-date-weekstart="1"/>
+                                   </div>
+                                </div>
+                               <div class="control-group">
+                                   <label class="control-label">done by</label>
+                                   <div class="controls">
+                                       <input type="text" class="input-small" size="16" name="authors" value="$authors" placeholder="username"/>
+                                   </div>
+                               </div>
+                            </div>
+                        <div class="span6">
+                            <div class="control-group">
+                                <label class="control-label">Show</label>
+                                <div class="controls">
+                                    <label py:for="filter in filters" class="checkbox">
+                                    <input type="checkbox" name="${filter.name}"
+                                        checked="${filter.enabled or None}"/> ${filter.label}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        
+                   <div class="form-actions">
+                     <input type="submit" class="btn btn-primary" name="update" value="${_('Update')}" />
+                   </div>
+                    </fieldset>
+                  </form>
+                </div>
+              </div>
+          </div>
+      </div>
+      <py:for each="day, events in groupby(events, key=lambda e: format_date(e.date))">
+        <h2>${day}: ${day == today and _("Today") or day == yesterday and _("Yesterday") or None}</h2>
+        <dl>
+          <py:for each="event in events"
+            py:with="highlight = precision and precisedate and timedelta(0) &lt;= (event.date - precisedate) &lt; precision">
+            <p class="${classes(event.kind, highlight=highlight)}">
+              <!-- TODO change icon-file according to something -->
+              <i class="icon-file"></i>
+              <a href="${event.render('url', context)}" py:choose="">
+                <py:when test="event.author"><i18n:msg params="time, title, author">
+                  <span class="time">${format_time(event.date, str('%H:%M'))}</span> ${event.render('title', context)}
+                  by <span class="author">${format_author(event.author)}</span>
+                </i18n:msg></py:when>
+                <py:otherwise>
+                  <span class="time">${format_time(event.date, str('%H:%M'))}</span> ${event.render('title', context)}
+                </py:otherwise>
+              </a>
+            <span class="${classes(event.kind, highlight=highlight)}">
+              ${event.render('description', context)}
+            </span>
+            </p>
+          </py:for>
+        </dl>
+      </py:for>
+
+      <div id="help" i18n:msg="">
+        <i class="icon-info-sign"></i> See <a href="${href.wiki('TracTimeline')}">TracTimeline</a>
+        for information about the timeline view.
+      </div>
+
+    </div>
+    </div>
+    <script type="text/javascript" charset="utf-8">
+        $('.datepicker').datepicker();
+    </script>
+  </body>
+</html>

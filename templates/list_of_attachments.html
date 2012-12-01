@@ -1,0 +1,52 @@
+<!--!
+Display a list of attachments.
+
+Arguments:
+ - alist: the data for the list of attachments
+ - compact=False: if True, show the list in compact format (e.g. as used in the wiki view)
+ - add_button_title=None: the title of the "Attach" button
+ - foldable=False: if True, make the list of attachments foldable
+-->
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:i18n="http://genshi.edgewall.org/i18n"
+      py:with="compact = value_of('compact', False);
+               add_button_title = value_of('add_button_title', None);
+               foldable = value_of('foldable', False)" py:strip="">
+  <py:def function="show_one_attachment(attachment)">
+    <i18n:msg params="file, size, author, date">
+<td><a href="${url_of(attachment.resource)}" title="View attachment">${attachment.filename
+        }</a><a href="${url_of(attachment.resource, format='raw')}" class="trac-rawlink" title="Download"><i class="icon.download-alt"></i></a></td><td><span title="${_('%(size)s bytes', size=attachment.size)}">${pretty_size(attachment.size)}</span></td><td><em>${authorinfo(attachment.author)}</em></td><td>${dateinfo(attachment.date)} ago</td>
+    </i18n:msg>
+  </py:def>
+  <py:if test="alist.attachments or alist.can_create">
+    <div class="attachments" py:choose="">
+      <py:when test="alist.attachments">
+        <div class="accordion" id="accordion-attach">
+          <div class="accordion-group">
+            <div class="accordion-heading">
+              <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-attach" href="#attachment-list">Attachments (${len(alist.attachments)})</a>
+            </div>
+            <div id="attachment-list" class="accordion-body collapse ${'in' if not compact else None}">
+              <div class="accordion-inner">
+                <table class="table table-condensed">
+                  <thead>
+                    <tr><th>Filename</th><th>Size</th><th>Uploaded by</th><th>On</th><th>Notes</th></tr>
+                  </thead>
+                  <tbody>
+                  <py:for each="attachment in alist.attachments">
+                    <tr>${show_one_attachment(attachment)}<td><q py:if="compact and attachment.description">${wiki_to_oneliner(context, attachment.description)}</q></td></tr>
+                  </py:for>
+                  </tbody>
+                </table>
+                <!-- TODO: check this for redundancy -->
+                <xi:include href="attach_file_form.html"/>
+              </div>
+            </div>
+          </div>
+        </div>
+      </py:when>
+    </div>
+  </py:if>
+</html>

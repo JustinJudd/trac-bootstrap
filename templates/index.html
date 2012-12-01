@@ -1,0 +1,67 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude">
+      <!-- NOTE: This is not actually being used, given the way Trac's main.py handles pathnames. It's kept here for future reference. -->
+    <head>
+        <title>Available Projects</title>
+        <!-- NOTE: CSS ordering is very important here -->
+        <link rel="stylesheet" type="text/css" href="${chrome('site/css/bootstrap.css')}" />
+        <link rel="stylesheet" type="text/css" href="${chrome('site/css/trac.css')}" />
+        <link rel="stylesheet" type="text/css" href="${chrome('site/css/bootstrap-responsive.css')}" />
+        <link rel="stylesheet" type="text/css" href="${chrome('site/css/trac-responsive.css')}" />
+        <script type="text/javascript" src="${chrome('site/js/jquery.js')}"></script>
+        <script type="text/javascript" src="${chrome('site/js/bootstrap.js')}"></script>
+        <script type="text/javascript" src="${chrome('site/js/bootstrap-trac.js')}"></script>
+        <!--[if lt IE 9]>
+        <script src="/chrome/site/js/html5.js"></script>
+        <![endif]-->
+    </head>
+
+  <body>
+        <div class="navbar navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <!-- collapsed menu button -->
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a href="/" class="brand">Trac</a>
+                    ${navigation('mainnav')}
+                </div>
+            </div>
+        </div><!-- navbar -->
+        
+        <div class="container">
+            <header class="subhead jumbotron">
+                <h1>Available Projects</h1>
+            </header>
+
+            <div id="content" class="index">
+                <ul>
+                  <li py:for="project in projects" py:choose="">
+                    <a py:when="project.href" href="$project.href"
+                       title="$project.description">$project.name</a>
+                    <py:otherwise>
+                      <small>$project.name: <em>Error</em> <br /> ($project.description)</small>
+                    </py:otherwise>
+                  </li>
+                </ul>
+            </div>
+
+            <div id="footer" py:match="//div[@id='footer']">
+                    <center>
+                    <a href="${href.about()}"><strong>Trac ${trac.version}</strong></a> by <a href="http://www.edgewall.org/">Edgewall Software</a>. Themed with <a href="http://twitter.github.com/bootstrap">Bootstrap</a>. Lovingly married at <a href="http://oss.sapo.pt">SAPO</a>.
+                    </center>
+            </div>
+
+        </div>
+    </body>
+</html>
+
+
+    

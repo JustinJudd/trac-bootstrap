@@ -1,0 +1,21 @@
+        <!-- The page H1 -->
+        <h1 id="ctxtheading" py:match="//h1[0]" py:attrs="select('@*')">${select('*|text()')}</h1>
+        
+        <!-- render the context navigation bar with our own generator -->
+        <!-- TODO: remove it when not necessary -->
+        <div id="content" py:match="//div[@id='content']" class="wiki container-fluid">${select('*|text()')}</div>
+        <!-- strip the footer div as well for now -->
+        <div id="footer" py:match="//div[@id='footer']" py:strip="True"/>
+        <table py:match="table[contains(@class,'listing')]" py:attrs="select('@*')" class="table table-striped table-bordered table-condensed">${select("*|text()")}</table>
+        <!-- flag primary buttons -->
+        <input py:match="//input[contains(@value,'Submit')]" py:attrs="select('@*')" class="btn btn-primary">${select("*|text()")}</input>
+        <input py:match="//input[contains(@value,'Save')]" py:attrs="select('@*')" class="btn btn-primary">${select("*|text()")}</input>
+        <input py:match="//input[contains(@value,'Edit')]" py:attrs="select('@*')" class="btn btn-primary">${select("*|text()")}</input>
+        <!-- flag dangerous buttons -->
+        <input py:match="//input[contains(@value,'Delete')]" py:attrs="select('@*')" class="btn btn-danger">${select("*|text()")}</input>
+        <!-- add button look to all inputs -->
+        <input py:match="//input[@type='submit']" py:attrs="select('@*')" class="btn">${select("*|text()")}</input>
+        <!-- add button look to table actions -->
+        <a py:match="//td[@class='action']/a[contains(@title,'Edit')]" py:attrs="select('@*')" class="btn btn-small btn-primary">${select("*|text()")}</a>
+        <a py:match="//td[@class='action']/a[contains(@title,'Delete')]" py:attrs="select('@*')" class="btn btn-small btn-danger">${select("*|text()")}</a>
+        <fieldset id="changeinfo" py:match="//fieldset[@id='changeinfo']" class="well">${select('*|text()')}</fieldset>
