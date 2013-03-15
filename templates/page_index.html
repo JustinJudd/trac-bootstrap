@@ -1,0 +1,41 @@
+<!--!  Display a page index.
+
+  `paginator` must be a trac.util.presentation.Paginator instance
+
+  -->
+<div xmlns="http://www.w3.org/1999/xhtml" 
+     xmlns:py="http://genshi.edgewall.org/" class="paging pagination" py:if="paginator.has_more_pages"> 
+  <ul>
+	<py:choose test="paginator.has_previous_page" >
+	  <py:when test="True" ><li py:with="prevlink = chrome.links.prev[0]" class="previous"> 
+		  <a href="${prevlink.href}" title="${prevlink.title}">&laquo;</a> 
+		</li> 
+	  </py:when>
+	  <py:otherwise><li class="previous disabled"> 
+		  <a href="#">&laquo;</a> 
+		</li> 
+      </py:otherwise>
+	</py:choose>
+
+    <py:for each="page in paginator.shown_pages"> 
+      <li py:if="page.string == paginator.current_page.string" class="active"><span>${paginator.current_page.string}</span></li>
+      <li py:if="page.string != paginator.current_page.string"> 
+        <a href="${page.href}" title="${page.title}">${page.string}</a> 
+      </li> 
+    </py:for> 
+
+
+	<py:choose test="paginator.has_next_page" >
+	  <py:when test="True" ><li py:with="nextlink = chrome.links.next[0]" class="next"> 
+		  <a href="${nextlink.href}" title="${nextlink.title}">&raquo;</a> 
+		</li> 
+	  </py:when>
+	  <py:otherwise><li class="next disabled"> 
+		  <a href="#">&raquo;</a> 
+		</li> 
+      </py:otherwise>
+	</py:choose>
+  </ul>
+
+</div> 
+

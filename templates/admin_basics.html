@@ -1,0 +1,48 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:py="http://genshi.edgewall.org/">
+  <xi:include href="admin.html" />
+  <head>
+    <title>Basics</title>
+  </head>
+
+  <body>
+    <h2>Basic Settings</h2>
+
+
+    <form class="mod form-horizontal" id="modbasic" method="post" action="">
+        <legend>Project</legend>
+
+		<div class="control-group">
+			<label class="control-label" for="name">Name:</label>
+			<div class="controls">
+			  <input type="text" name="name" id="name" value="${project.name}" placeholder="Name" />
+			</div>
+	    </div>
+		<div class="control-group">
+			<label class="control-label" for="url">URL:</label>
+			<div class="controls">
+			  <input type="text" name="url" id="url" value="${project.url}" placeholder="URL" />
+			</div>
+	    </div>
+		<div class="control-group">
+			<label class="control-label" for="descr">Description:</label>
+			<div class="controls">
+			  <textarea name="descr" id="descr" class="trac-resizable" rows="3" cols="50">
+${project.description}</textarea>
+			</div>
+	    </div>
+		
+		<div class="control-group">
+			<div class="controls">
+			  <input type="submit" value="${_('Apply changes')}" class="btn" />
+			</div>
+	  	</div>
+
+    </form>
+  </body>
+
+</html>

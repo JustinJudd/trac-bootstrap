@@ -8,8 +8,6 @@
   <xi:include href="admin.html" />
   <head>
     <title>Plugins</title>
-    <script src="${href.chrome('site/js/bootstrap-transition.js')}"></script>
-    <script src="${href.chrome('site/js/bootstrap-collapse.js')}"></script>
     <style>
     .lsel {
 	    min-height: 24px !important;
@@ -50,8 +48,11 @@
 
     <form py:for="idx, plugin in enumerate(plugins)" method="post" action="">
       <!-- TODO: nested folding -->
-      <div class="plugin" id="trac-plugin-${plugin.name}">
-        <h3 class="foldable">${plugin.name} ${plugin.version}</h3>
+      <div class="accordion" id="trac-plugin-${plugin.name}">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+		    	<h3 class="foldable"><a class="accordion-toggle" data-toggle="collapse" href="#${plugin.name}_collapseOne">&#x25BC; ${plugin.name} ${plugin.version}</a></h3>
+			</div>
         <!--! FIXME: Plugin uninstall disabled as it is unreliable (#3545)
         <div class="uninstall buttons">
           <input type="hidden" name="plugin_filename"
@@ -87,6 +88,8 @@
             </py:if>
           </dl>
         </py:if>
+		<div id="${plugin.name}_collapseOne" class="accordion-body collapse in">
+
         
         
           <div class="accordion" py:for="module_name, module in sorted(plugin.modules.iteritems())">
@@ -94,14 +97,13 @@
             <div class="accordion-heading">
 	            <py:choose>
                     <a class="accordion-toggle class-name" data-toggle="collapse" data-parent="${module_name}" py:when="module.description" 
-                       href="${href.admin('general', 'plugin', show=not show_doc and module_name or None)                                                     
-                               + '#trac-mod-' + module_name}">${module_name}.*</a>
+                       href="#trac-mod-${module_name.replace('.','_')}">${module_name}.*</a>
                     <span py:otherwise="" class="trac-name">${module_name}.*</span>
                  </py:choose>
             </div>
-            <div id="${module_name}" class="accordion-body collapse in">
-              <div py:with="show_doc = show == plugin.name or show == module_name" id="trac-mod-${module_name}"
-                  class="trac-module${not show_doc and ' collapsed' or None}">
+            <div id="${module_name.replace('.','_')}" class="accordion-body collapse in">
+              <div py:with="show_doc = show == plugin.name or show == module_name" id="trac-mod-${module_name.replace('.','_')}"
+                  class="trac-module${not show_doc and ' collapsed' or None} accordion-body collapse">
                 <p class="trac-heading${module.description and ' foldable' or None}">
                                     <span py:if="module.summary" class="trac-summary"> &mdash; ${module.summary}</span>
                 </p>
@@ -117,19 +119,22 @@
                        checked="${component.enabled or None}"
                        disabled="${component.required or None}" />
               </div>
+
+
               <div py:with="show_doc = show == plugin.name or show == component.full_name" id="trac-comp-${component.full_name}"
                   class="lsel trac-component${not show_doc and ' collapsed' or None}">
-                <p class="trac-heading${component.description and ' foldable' or None}">
+                <div class="trac-heading${component.description and ' foldable' or None}">
                   <py:choose>
-                    <a py:when="component.description" class="trac-name"
-                       href="${href.admin('general', 'plugin', show=not show_doc and component.full_name or None)                                             
-                               + '#trac-comp-' + component.full_name}">${component_name}</a>
+                    <a py:when="component.description" class="trac-name accordion-toggle"
+                       href="#trac-comp-${component_name}" data-toggle="collapse">${component_name}</a>
                     <span py:otherwise="" class="trac-name">${component_name}</span>
                   </py:choose>
                   <span py:if="component.summary" class="trac-summary"> &mdash; ${component.summary}</span>
-                </p>
-                <div py:if="component.description" xml:space="preserve">${safe_wiki_to_html(context, component.description)}</div>
+                </div>
+                <div py:if="component.description" xml:space="preserve" id="trac-comp-${component_name}" class="accordion-body collapse">${safe_wiki_to_html(context, component.description)}</div>
               </div>
+
+
             </div>
             </div>
             </div>
@@ -139,6 +144,9 @@
           <input type="submit" class="btn btn-primary" name="update" value="${_('Apply changes')}" />
         </div>
       </div>
+		</div>
+
+  </div>
     </form>
   </body>
 

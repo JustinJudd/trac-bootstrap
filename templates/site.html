@@ -5,7 +5,20 @@
         <ul class="nav" py:if="chrome.nav[category]">
             <li py:for="idx, item in enumerate(chrome.nav[category])" class="${classes(first_last(idx, chrome.nav[category]), active=item.active)}">${item.label}</li>
         </ul>
-        <form class="navbar-search pull-right" action="/search">
+
+		<ul class="nav pull-right">
+		  <li class="dropdown">
+			<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+			  <i class="icon-user icon-white"></i> ${user_menu_text}
+			  <b class="caret"></b>
+			</a>
+			<ul class="dropdown-menu" py:if="chrome.nav['metanav']">
+              <li py:for="idx, item in  enumerate(chrome.nav['metanav'])"
+                  class="${classes(first_last(idx, chrome.nav['metanav']), active=item.active)}">${item.label}</li>
+            </ul>
+		  </li>
+		</ul>
+        <form class="navbar-search pull-right" action="${href.search()}">
             <input type="text" name="q" class="search-query" placeholder="Search"/>
         </form>
     </div>
@@ -15,29 +28,96 @@
         from genshi.builder import Element
         if chrome['ctxtnav']:
             replacements = []
+            t = 'links'
             for item in chrome['ctxtnav']:
-                junk = []
-                if isinstance(item,str):
-                    continue
-                for i in item.children:
-                    if isinstance(i,Element):
-                        replacements.append((item,i))
-                    if isinstance(i, Markup):
-                        junk.append(i)
-                for i in junk:
-                    item.children.remove(i)
-            for item, i in replacements:
-                chrome['ctxtnav'][chrome['ctxtnav'].index(item)] = i
+                print "Type"
+                print type(item)
+                if isinstance(item,str) or isinstance(item,unicode):
+                    if t == 'links':
+                        t = 'mixed'
+                elif isinstance(item,Element):
+                    if "span" in item.__repr__():
+                        t = 'span'
+            if t == 'links':
+                for item in chrome['ctxtnav']:
+                    if item.children:
+                        for i in item.children:
+                            junk = []
+                            if isinstance(i,Element):
+                                replacements.append((item,i))
+                            elif isinstance(i, Markup):
+                                junk.append(i)
+                            else:
+                                new_element = Element('li', class_=c)(item)
+                                replacements.append((item,new_element))
+                    for i in junk:
+                        item.children.remove(i)
+                for item, i in replacements:
+                    chrome['ctxtnav'][chrome['ctxtnav'].index(item)] = i
+                chrome['ctxtnav'] = [ Element('div', class_="subnav")(Element('ul', class_="nav nav-pills")(chrome['ctxtnav'])) ]
+            if t == 'span': #extract links from span, convert just text span to link(disabled)
+                for idx, item in enumerate(chrome['ctxtnav']):
+                    junk = []
+                    c = ''
+                    if idx==0:
+                        c = 'previous'
+                    else:
+                        c = 'next'
+                    for i in item.children:
+                        print i
+                        print type(i)
+                        if isinstance(i,Element):
+                            new_element = Element('li', class_=c)(i)
+                            replacements.append((item,new_element))
+                        elif isinstance(i, Markup):
+                            junk.append(i)
+                        elif isinstance(i,str):
+                            new_element = Element('li', class_=c + ' disabled')(Element('a')(i, href="#"))
+                            replacements.append((item,new_element))
+                    for i in junk:
+                        item.children.remove(i)
+                for item, i in replacements:
+                    chrome['ctxtnav'][chrome['ctxtnav'].index(item)] = i
+                chrome['ctxtnav'] = [ Element('ul', class_="pager")(chrome['ctxtnav']) ]
+            if t == 'mixed': #extract links from and convert non_link to link
+                for idx,item in enumerate(chrome['ctxtnav']):
+                    junk = []
+                    if isinstance(item,str) or isinstance(item,unicode):
+                        new_element = Element('li', class_="disabled")(Element('a')(item, href="#"))
+                        replacements.append((item,new_element))
+                        continue
+                    elif isinstance(item, Element):
+                        new_element = Element('li', class_="disabled")(item)
+                        replacements.append((item,new_element))
+                    for i in item.children:
+                        if isinstance(i,Element):
+                            #new_element = Element(li, class_=c)(Element('a')(i, href="#"))
+                            #print "Replacement"
+                            #print i
+                            replacements.append((item,i))
+                        elif isinstance(i, Markup):
+                            junk.append(i)
+                        elif isinstance(i,str):
+                            new_element = Element('li', class_=c)(item)
+                            replacements.append((item,new_element))
+                    for i in junk:
+                        item.children.remove(i)
+                for item, i in replacements:
+                    chrome['ctxtnav'][chrome['ctxtnav'].index(item)] = i
+                chrome['ctxtnav'] = [ Element('div', class_="subnav" ) (Element('ul', class_="nav nav-pills")(chrome['ctxtnav']) ) ]
     ?>
 
     <!-- our own context navigation generator -->
-    <div py:def="ctxtnav" id="${category}" class="subnav">
-        <ul class="nav nav-pills" py:if="chrome.ctxtnav">
-            <li py:for="idx, item in enumerate(chrome.ctxtnav)" class="${classes(first_last(idx, chrome.ctxtnav))}">$item</li>
-        </ul>
+    <!-- 3 types of inputlist of links, mixed links and text(text should be turned into a disabled link), and spans(pager - spans should contain links or text) -->
+    <div py:def="ctxtnav" id="${category}">
+         <py:if test="chrome.ctxtnav">
+			${chrome.ctxtnav[0]}
+		 </py:if>
     </div>
 
     <head py:match="head" py:attrs="select('@*')">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title py:if="title">$title</title>
 
         <!-- remove standard Trac css -->
@@ -48,12 +128,13 @@
         <!-- remove standard Trac jQuery -->
         <script py:match="//script[contains(@src,'/chrome/common/js/jquery.js')]" py:strip="True"></script>
         <!-- NOTE: CSS ordering is very important here -->
-        <link rel="stylesheet" type="text/css" href="${href.chrome('site/css/bootstrap.css')}" />
+         <link rel="stylesheet" type="text/css" href="${href.chrome('site/css/bootstrap.min.css')}" /> 
         <link rel="stylesheet" type="text/css" href="${href.chrome('site/css/trac.css')}" />
-        <link rel="stylesheet" type="text/css" href="${href.chrome('site/css/bootstrap-responsive.css')}" />
+        <link rel="stylesheet" type="text/css" href="${href.chrome('site/css/bootstrap-responsive.min.css')}" />
         <link rel="stylesheet" type="text/css" href="${href.chrome('site/css/trac-responsive.css')}" />
-        <script type="text/javascript" src="${href.chrome('site/js/jquery.js')}"></script>
-        <script type="text/javascript" src="${href.chrome('site/js/bootstrap.js')}"></script>
+        <!-- <script type="text/javascript" src="${href.chrome('site/js/jquery.js')}"></script> -->
+        <script type="text/javascript" src="${href.chrome('site/js/jquery.min.js')}"></script>
+        <script type="text/javascript" src="${href.chrome('site/js/bootstrap.min.js')}"></script>
         <script type="text/javascript" src="${href.chrome('site/js/bootstrap-trac.js')}"></script>
          ${select('*|comment()|text()')}
         <!--[if lt IE 9]>

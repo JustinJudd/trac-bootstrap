@@ -1,0 +1,116 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:i18n="http://genshi.edgewall.org/i18n">
+  <xi:include href="admin.html" />
+  <head>
+    <title>Permissions</title>
+  </head>
+
+  <body>
+    <h2>Manage Permissions</h2>
+
+    <py:if test="'PERMISSION_GRANT' in perm">
+    <form id="addperm" class="addnew form-horizontal" method="post" action="">
+		<legend>Grant Permission:</legend>
+		<div class="control-group">
+			<label class="control-label" for="gp_subject">Subject:</label>
+			<div class="controls">
+			  <input type="text" id="gp_subject" name="subject" placeholder="Subject" />
+			</div>
+	    </div>
+		<div class="control-group">
+			<label class="control-label" for="action">Action:</label>
+			<div class="controls">
+			  <select id="action" name="action" class="btn">
+                <option py:for="action in sorted(actions)">$action</option>
+              </select>
+			</div>
+	    </div>
+		
+		<div class="control-group">
+			<div class="controls">
+				<span class="help-block">Grant permission for an action to a subject, which can be either a user
+          or a group.</span>
+			</div>
+	  	</div>
+        <div class="control-group">
+			<div class="controls">
+			  <input type="submit" name="add" value="${_('Add')}" class="btn" />
+			</div>
+	  	</div>
+    </form>
+
+    <form id="addsubj" class="addnew form-horizontal" method="post" action="">
+        <legend>Add Subject to Group:</legend>
+		<div class="control-group">
+			<label class="control-label" for="sg_subject">Subject:</label>
+			<div class="controls">
+			  <input type="text" id="sg_subject" name="subject" placeholder="Subject" />
+			</div>
+	    </div>
+		<div class="control-group">
+			<label class="control-label" for="sg_group">Group:</label>
+			<div class="controls">
+			  <input type="text" id="sg_group" name="group" placeholder="Group" />
+			</div>
+	    </div>
+		
+		<div class="control-group">
+			<div class="controls">
+				<span class="help-block">Add a user or group to an existing permission group.</span>
+			</div>
+	  	</div>
+
+        <div class="control-group">
+			<div class="controls">
+			  <input type="submit" name="add" value="${_('Add')}" class="btn" />
+			</div>
+	  	</div>
+
+    </form>
+    </py:if>
+
+    <form id="revokeform" method="post" py:with="revoke_perm = 'PERMISSION_REVOKE' in perm" action="" class="form-horizontal">
+      <table class="listing table" id="permlist">
+        <thead>
+          <tr><th>Subject</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr py:for="idx, (subject, perm_group) in enumerate(groupby(sorted(perms), key=lambda tmp: tmp[0]))"
+              class="${idx % 2 and 'odd' or 'even'}">
+            <td>$subject</td>
+            <td>
+              <py:for each="cnt, (subject,action) in enumerate(perm_group)"
+                      py:with="subject_action='%s:%s' % (unicode_to_base64(subject),
+                                                         unicode_to_base64(action));
+                               subject_action_id='sa-%d-%d' % (idx, cnt)">
+                <!--! base64 make it safe to use ':' as separator when passing
+                      both subject and action as one query parameter -->
+                <div>
+				  <label for="$subject_action_id" class="checkbox">
+                  <input py:if="revoke_perm" type="checkbox"
+                         id="$subject_action_id"
+                         name="sel" value="$subject_action" />
+                  $action</label>
+                </div>
+              </py:for>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="buttons" py:if="revoke_perm">
+        <input type="submit" name="remove" value="${_('Remove selected items')}" class="btn" />
+      </div>
+    </form>
+
+    <p  i18n:msg="">
+      Note that <em>Subject</em> or <em>Group</em> names can't be all upper-case,
+      as that is reserved for permission names.
+    </p>
+  </body>
+
+</html>
