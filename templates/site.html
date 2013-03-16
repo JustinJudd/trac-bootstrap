@@ -30,8 +30,6 @@
             replacements = []
             t = 'links'
             for item in chrome['ctxtnav']:
-                print "Type"
-                print type(item)
                 if isinstance(item,str) or isinstance(item,unicode):
                     if t == 'links':
                         t = 'mixed'
@@ -64,8 +62,6 @@
                     else:
                         c = 'next'
                     for i in item.children:
-                        print i
-                        print type(i)
                         if isinstance(i,Element):
                             new_element = Element('li', class_=c)(i)
                             replacements.append((item,new_element))
@@ -83,11 +79,11 @@
                 for idx,item in enumerate(chrome['ctxtnav']):
                     junk = []
                     if isinstance(item,str) or isinstance(item,unicode):
-                        new_element = Element('li', class_="disabled")(Element('a')(item, href="#"))
+                        new_element = Element('li', class_="active")(Element('a')(item, href="#"))
                         replacements.append((item,new_element))
                         continue
                     elif isinstance(item, Element):
-                        new_element = Element('li', class_="disabled")(item)
+                        new_element = Element('li')(item)
                         replacements.append((item,new_element))
                     for i in item.children:
                         if isinstance(i,Element):
@@ -99,7 +95,7 @@
                             junk.append(i)
                         elif isinstance(i,str):
                             new_element = Element('li', class_=c)(item)
-                            replacements.append((item,new_element))
+                            #replacements.append((item,new_element))
                     for i in junk:
                         item.children.remove(i)
                 for item, i in replacements:
@@ -164,7 +160,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </a>
-                    <a href="/" class="brand">Trac</a>
+                    <a href="#" class="brand">$project.name</a>
                     ${navigation('mainnav')}
                 </div>
             </div>
